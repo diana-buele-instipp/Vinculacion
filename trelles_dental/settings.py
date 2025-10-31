@@ -21,17 +21,7 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# 4. MIDDLEWARE: Agregar WhiteNoise para servir archivos estáticos
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # AÑADIDO PARA SERVIR ESTÁTICOS
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ]
+
 
 # Application definition
 
@@ -77,13 +67,26 @@ WSGI_APPLICATION = 'trelles_dental.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'), # Obtener URL de Render
-        conn_max_age=600 # Opcional: Reutilizar conexiones
-    )
-}
+if DATABASE_URL:
+    # 1. Configuración de PostgreSQL para Render/Producción
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            # Aseguramos que el motor (ENGINE) siempre se establezca para PostgreSQL
+            engine='django.db.backends.postgresql'
+        )
+    }
+else:
+    # 2. Configuración de SQLite para Desarrollo Local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 #DATABASES = {
     #'default': {
         #'ENGINE': 'django.db.backends.postgresql',
