@@ -15,12 +15,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'default-insecure-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG_VALUE', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
-if RENDER_EXTERNAL_HOSTNAME:
+if DEBUG:
+    ALLOWED_HOSTS = ['*'] # Permitir todos los hosts en desarrollo local con DEBUG=True
+elif RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
 
 
 # Application definition
@@ -72,14 +73,14 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
     # 1. Configuración de PostgreSQL para Render/Producción
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            # Aseguramos que el motor (ENGINE) siempre se establezca para PostgreSQL
-            engine='django.db.backends.postgresql'
-        )
-    }
+   DATABASES = {
+      'default': dj_database_url.config(
+         default=DATABASE_URL,
+         conn_max_age=600,
+            # Se ha eliminado el 'engine=...' para evitar conflictos.
+            # Asegúrate de que tu URL comience con 'postgres://' o 'postgresql://'.
+      )
+ }
 else:
     # 2. Configuración de SQLite para Desarrollo Local
     DATABASES = {
@@ -123,9 +124,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Lima'
 
 USE_I18N = True
 
@@ -137,9 +138,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
-    STATIC_DIR,    
+os.path.join(BASE_DIR, 'static'),   
 ]
 
 # Usa el almacenamiento de archivos estáticos comprimido y con hash de WhiteNoise
